@@ -6,11 +6,14 @@ import {
   CreateMessageDto,
 } from "../../services/messageService";
 import { SendHorizontal } from "lucide-react";
+import { useSocket } from "@/contexts/SocketContext";
 
 const MessageForm: React.FC = () => {
   const { register, handleSubmit, reset, watch } = useForm<CreateMessageDto>();
   const queryClient = useQueryClient();
   const messageText = watch("text", "");
+  const socketContext = useSocket();
+  const { socket } = socketContext || {};
 
   const allowToSend = messageText.trim() !== "";
 
@@ -18,6 +21,9 @@ const MessageForm: React.FC = () => {
     mutationFn: (data: CreateMessageDto) => messageService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
+      if (socket) {
+        socket.emit("newMessageFromFront", { text: messageText });
+      }
       reset();
     },
   });
