@@ -11,9 +11,17 @@ export interface Message {
     id: string;
     email: string;
   };
+  likedBy: {
+    id: string;
+    email: string;
+  }[];
 }
 
 export interface CreateMessageDto {
+  text: string;
+}
+
+export interface UpdateMessageDto {
   text: string;
 }
 
@@ -30,7 +38,6 @@ export const messageService = {
 
   async findAll(): Promise<Message[]> {
     const response = await axios.get(API_URL);
-    console.log(response.data);
     return response.data;
   },
 
@@ -51,6 +58,16 @@ export const messageService = {
         Authorization: `Bearer ${token}`,
       },
     });
+    return response.data;
+  },
+
+  async toggleLikeMessage(messageId: string): Promise<Message> {
+    const token = authService.getToken();
+    const response = await axios.patch(
+      `${API_URL}/${messageId}/like`, 
+      {}, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     return response.data;
   },
 
